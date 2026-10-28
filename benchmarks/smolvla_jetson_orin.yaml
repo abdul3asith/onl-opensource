@@ -1,0 +1,9 @@
+# Config for a published benchmark run. Invoke with:
+#   deploycheck run --policy lerobot/smolvla_base --device cuda --variants baseline,fp16,compile,int8 \
+#     --steps 500 --episodes 20 --out results/smolvla_jetson_orin.json
+policy: lerobot/smolvla_base
+device: cuda            # Jetson Orin Nano Super, JetPack 6.x
+variants: [baseline, fp16, compile, int8]
+steps: 500
+episodes: 20
+task: libero_object
