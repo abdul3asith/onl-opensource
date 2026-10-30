@@ -14,7 +14,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # Real robot policies. Install with: uv pip install -e ".[lerobot]"
-lerobot = ["lerobot>=0.3"]
+lerobot = ["lerobot[smolvla]>=0.4.4"]
 dev = ["pytest>=8", "ruff>=0.6", "pre-commit>=3.7"]
 
 [project.scripts]

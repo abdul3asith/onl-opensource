@@ -1,7 +1,7 @@
 """Command line entry point.
 
-    deploycheck run --policy dummy --device cpu
-    deploycheck run --policy lerobot/smolvla_base --device cuda --variants baseline,fp16,compile
+deploycheck run --policy dummy --device cpu
+deploycheck run --policy lerobot/smolvla_base --device cuda --variants baseline,fp16,compile
 """
 
 from __future__ import annotations
@@ -19,18 +19,28 @@ from deploycheck.profile import profile
 from deploycheck.report import build_report, print_table, write_json
 from deploycheck.verify import verify
 
-app = typer.Typer(add_completion=False, help="Profile, optimize and verify robot policies.")
+app = typer.Typer(
+    add_completion=False, help="Profile, optimize and verify robot policies."
+)
 console = Console()
+
+torch.set_float32_matmul_precision("high")
 
 
 @app.command()
 def run(
-    policy: str = typer.Option("dummy", help="'dummy' or a LeRobot repo id, e.g. lerobot/smolvla_base"),
+    policy: str = typer.Option(
+        "dummy", help="'dummy' or a LeRobot repo id, e.g. lerobot/smolvla_base"
+    ),
     device: str = typer.Option("cuda" if torch.cuda.is_available() else "cpu"),
-    variants: str = typer.Option("baseline,fp16", help=f"comma-separated subset of {VARIANTS}"),
+    variants: str = typer.Option(
+        "baseline,fp16", help=f"comma-separated subset of {VARIANTS}"
+    ),
     steps: int = typer.Option(200, help="timed inference steps per variant"),
     episodes: int = typer.Option(10, help="simulator episodes for success rate"),
-    out: Path = typer.Option(RESULTS_DIR / "latest.json", help="where to write the JSON report"),
+    out: Path = typer.Option(
+        RESULTS_DIR / "latest.json", help="where to write the JSON report"
+    ),
 ) -> None:
     """Run the full deployability check and print a before/after table."""
     names = [v.strip() for v in variants.split(",") if v.strip()]
@@ -57,7 +67,9 @@ def run(
 def devices() -> None:
     """List what this machine can run on."""
     console.print(f"cpu: available")
-    console.print(f"cuda: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'not available'}")
+    console.print(
+        f"cuda: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'not available'}"
+    )
 
 
 if __name__ == "__main__":

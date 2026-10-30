@@ -20,17 +20,27 @@ def _clone(policy: Policy) -> Policy:
 
 
 def to_fp16(policy: Policy) -> Policy:
-    """Half precision. Only meaningful on GPU."""
+    """Half precision. Only meaningful on GPU.
+
+    Weights go to fp16 and act() runs under autocast, so float32 tensors a model makes
+    inside its forward (e.g. SmolVLA's denoising noise) are cast to match the weights.
+    """
     p = _clone(policy)
     p.module().half()
-    orig_obs = p.example_observation
+    orig_obs, orig_act = p.example_observation, p.act
+    device_type = torch.device(policy.device).type
 
     def obs_fp16() -> dict[str, torch.Tensor]:
         return {
             k: v.half() if v.is_floating_point() else v for k, v in orig_obs().items()
         }
 
+    def act_fp16(obs: dict[str, torch.Tensor]) -> torch.Tensor:
+        with torch.autocast(device_type, dtype=torch.float16):
+            return orig_act(obs)
+
     p.example_observation = obs_fp16  # type: ignore[method-assign]
+    p.act = act_fp16  # type: ignore[method-assign]
     p.name = policy.name
     return p
 
